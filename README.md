@@ -1,2 +1,2 @@
 # BF-Interpreter
-A basic Brainf*ck interpreter written in ASM (MASM)
+A basic Brainf*ck interpreter written in ASM (NASM)
