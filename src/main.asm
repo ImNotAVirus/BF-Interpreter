@@ -75,6 +75,8 @@ end_of_switch:
     JMP loop
 
 _exit:
+    MOV RDI, ENDL
+    CALL asm_putchar
     MOV RAX, 60                     ; Exit
     XOR RDI, RDI                    ; Exit code : 0
     SYSCALL
