@@ -83,12 +83,12 @@ _exit:
 ;----------------------------------------------------------
 
 _right_chevron:
-    
+    INC DWORD [MEMORY_PTR]
     JMP end_of_switch
 
 
 _left_chevron:
-    
+    DEC DWORD [MEMORY_PTR]
     JMP end_of_switch
 
 
