@@ -107,7 +107,10 @@ _minus:
     JMP end_of_switch
 
 _dot:
-    
+    PUSH RDI
+    MOV RDI, RDX
+    CALL asm_putchar
+    POP RDI
     JMP end_of_switch
 
 _comma:
