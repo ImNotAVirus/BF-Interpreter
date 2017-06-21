@@ -9,13 +9,16 @@ BITS 64
 ;-----------------------------------------------------
 
 ;-------------------- Static vars --------------------
+SECTION .bss
 MEMORY: RESB MEMORY_SIZE
+MEMORY_PTR: RESD 1
 ;-----------------------------------------------------
 
 ;--------------------- Variables ---------------------
 SECTION .data
-ERR_PARAMS	DB    	"This program take one param", ENDL, 0
-CURRENT_CHR	DB    	"Current char : ", 0
+ERR_PARAMS   DB     "This program take one param", ENDL, 0
+UNKNOWN_CHR  DB     "Unknown character : ", 0
+EMPTY_STR    DB     0
 ;-----------------------------------------------------
 
 SECTION .text
@@ -25,34 +28,93 @@ EXTERN asm_putstr
 EXTERN asm_throw
 
 _start:
-    POP RAX			; argc
-    POP RSI			; argv
-    CMP RAX, 2			; if (argc == 2) go to main function
+    POP RAX                         ; argc
+    POP RSI                         ; argv
+    CMP RAX, 2                      ; if (argc == 2) go to main function
     JE main
-    MOV RDI, ERR_PARAMS		; else throw an error
+    MOV RDI, ERR_PARAMS             ; else throw an error
     CALL asm_throw
 
 main: 
-    ADD RSI, 8			; get first param
-    MOV RCX, 0			; init counter
+    ADD RSI, 8                      ; get first param
+    MOV RCX, 0                      ; init counter
 
-loop:
-    CMP BYTE [RSI + RCX], 0	; while current char != '\0'
+loop: 
+    MOVZX RDX, BYTE [RSI + RCX]     ; RDI = buff[i]
+    CMP RDX, 0                      ; while buff[i] != '\0'
     JE _exit
 
-    ; INSERT THE SWICH/CASE HERE !
-    MOV RDI, CURRENT_CHR
+switch:
+    CMP RDX, '>'                    ; case '>'
+    JE _right_chevron
+    CMP RDX, '<'                    ; case '<'
+    JE _left_chevron
+    CMP RDX, '+'                    ; case '+'
+    JE _plus
+    CMP RDX, '-'                    ; case '-'
+    JE _minus
+    CMP RDX, '.'                    ; case '.'
+    JE _dot
+    CMP RDX, ','                    ; case ','
+    JE _comma
+    CMP RDX, '['                    ; case '['
+    JE _left_bracket
+    CMP RDX, ']'                    ; case ']'
+    JE _right_bracket
+    MOV RDI, UNKNOWN_CHR            ; default
     CALL asm_putstr 
-    MOVZX RDI, BYTE [RSI + RCX]	; get current byte
+    MOV RDI, RDX
     CALL asm_putchar
     MOV RDI, ENDL
     CALL asm_putchar
+    MOV RDI, EMPTY_STR
+    CALL asm_throw
 
+end_of_switch:
     INC RCX
     JMP loop
 
 _exit:
-    MOV RAX, 60			; Exit
-    XOR RDI, RDI		; Exit code : 0
+    MOV RAX, 60                     ; Exit
+    XOR RDI, RDI                    ; Exit code : 0
     SYSCALL
+
+
+;----------------------------------------------------------
+
+_right_chevron:
+    
+    JMP end_of_switch
+
+
+_left_chevron:
+    
+    JMP end_of_switch
+
+
+_plus:
+    
+    JMP end_of_switch
+
+
+_minus:
+    
+    JMP end_of_switch
+
+
+_dot:
+    
+    JMP end_of_switch
+
+_comma:
+
+    JMP end_of_switch
+
+_left_bracket:
+    
+    JMP end_of_switch
+
+_right_bracket:
+    
+    JMP end_of_switch
 
