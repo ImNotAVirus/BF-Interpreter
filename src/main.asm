@@ -93,9 +93,11 @@ _left_chevron:
 
 
 _plus:
-    
+    PUSH RBX
+    MOV EBX, DWORD [MEMORY_PTR]
+    INC BYTE [MEMORY + EBX]
+    POP RBX
     JMP end_of_switch
-
 
 _minus:
     
