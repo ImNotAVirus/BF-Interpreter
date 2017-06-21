@@ -100,9 +100,11 @@ _plus:
     JMP end_of_switch
 
 _minus:
-    
+    PUSH RBX
+    MOV EBX, DWORD [MEMORY_PTR]
+    DEC BYTE [MEMORY + EBX]
+    POP RBX
     JMP end_of_switch
-
 
 _dot:
     
