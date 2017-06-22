@@ -110,8 +110,11 @@ _minus:
 
 _dot:
     PUSH RDI
-    MOV RDI, RDX
+    PUSH RBX
+    MOV EBX, DWORD [MEMORY_PTR]
+    MOVZX RDI, BYTE [MEMORY + EBX]
     CALL asm_putchar
+    POP RBX
     POP RDI
     JMP end_of_switch
 
