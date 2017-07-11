@@ -55,8 +55,8 @@ switch:
     JE _minus
     CMP RDX, '.'                    ; case '.'
     JE _dot
-    CMP RDX, ','                    ; case ','
-    JE _comma
+    ; CMP RDX, ','                    ; case ','
+    ; JE _comma
     CMP RDX, '['                    ; case '['
     JE _left_bracket
     CMP RDX, ']'                    ; case ']'
@@ -75,12 +75,9 @@ end_of_switch:
     JMP loop
 
 _exit:
-    MOV RDI, ENDL
-    CALL asm_putchar
     MOV RAX, 60                     ; Exit
     XOR RDI, RDI                    ; Exit code : 0
     SYSCALL
-
 
 ;----------------------------------------------------------
 
@@ -122,11 +119,19 @@ _comma:
 
     JMP end_of_switch
 
-_left_bracket:
-    
+_left_bracket: 
     JMP end_of_switch
 
 _right_bracket:
-    
+    PUSH RBX
+    MOV EBX, DWORD [MEMORY_PTR]
+    CMP BYTE [MEMORY + EBX], 0      ; Check if end of loop
+    JE rb_end
+rb_loop:                            ; Else return to begin
+    DEC RCX
+    CMP BYTE [RSI + RCX], '['
+    JNE rb_loop
+rb_end:
+    POP RBX
     JMP end_of_switch
 
