@@ -5,7 +5,7 @@ BITS 64
 
 ;---------------------- Defines ----------------------
 %define ENDL 0x0A
-%define MEMORY_SIZE 156
+%define MEMORY_SIZE 30000
 ;-----------------------------------------------------
 
 ;-------------------- Static vars --------------------
@@ -81,31 +81,31 @@ _exit:
 
 ;----------------------------------------------------------
 
-_right_chevron:
+_right_chevron:                     ; ++i
     INC DWORD [MEMORY_PTR]
     JMP end_of_switch
 
 
-_left_chevron:
+_left_chevron:                      ; --i
     DEC DWORD [MEMORY_PTR]
     JMP end_of_switch
 
 
-_plus:
+_plus:                              ; ++memory[i]
     PUSH RBX
     MOV EBX, DWORD [MEMORY_PTR]
     INC BYTE [MEMORY + EBX]
     POP RBX
     JMP end_of_switch
 
-_minus:
+_minus:                             ; --memory[i]
     PUSH RBX
     MOV EBX, DWORD [MEMORY_PTR]
     DEC BYTE [MEMORY + EBX]
     POP RBX
     JMP end_of_switch
 
-_dot:
+_dot:                               ; Just print memory[i]
     PUSH RDI
     PUSH RBX
     MOV EBX, DWORD [MEMORY_PTR]
@@ -115,23 +115,65 @@ _dot:
     POP RDI
     JMP end_of_switch
 
-_comma:
+_comma:                             ; Wait an input
 
     JMP end_of_switch
 
-_left_bracket: 
-    JMP end_of_switch
-
-_right_bracket:
+_left_bracket:                      ; while(memory[i])
     PUSH RBX
     MOV EBX, DWORD [MEMORY_PTR]
-    CMP BYTE [MEMORY + EBX], 0      ; Check if end of loop
-    JE rb_end
-rb_loop:                            ; Else return to begin
-    DEC RCX
+    CMP BYTE [MEMORY + EBX], 0      ; Check if end of while
+    JNE lb_end
+    PUSH RAX                        ; Depth counter
+    XOR RAX, RAX
+lb_loop:
+    INC RCX
     CMP BYTE [RSI + RCX], '['
-    JNE rb_loop
-rb_end:
+    JE lb_depth_inc
+    CMP BYTE [RSI + RCX], ']'
+    JE lb_check
+    JMP lb_loop
+lb_check:
+    CMP RAX, 0
+    JG lb_depth_dec
+    JMP lb_check_ok
+lb_check_ok:
+    POP RAX
+lb_end:                             ; End of function
     POP RBX
     JMP end_of_switch
+lb_depth_inc:
+    INC RAX
+    JMP lb_loop
+lb_depth_dec:
+    DEC RAX
+    JMP lb_loop
+
+_right_bracket:                     ; End of loop
+    PUSH RAX                        ; Depth counter
+    PUSH RBX
+    MOV EBX, DWORD [MEMORY_PTR]
+    CMP BYTE [MEMORY + EBX], 0      ; Check if end of while
+    JE rb_end
+    XOR RAX, RAX
+rb_loop:
+    DEC RCX
+    CMP BYTE [RSI + RCX], '['
+    JE rb_check
+    CMP BYTE [RSI + RCX], ']'
+    JE rb_depth_inc
+    JMP rb_loop
+rb_check:
+    CMP RAX, 0
+    JG rb_depth_dec
+rb_end:                             ; End of function
+    POP RBX
+    POP RAX
+    JMP end_of_switch
+rb_depth_inc:
+    INC RAX
+    JMP rb_loop
+rb_depth_dec:
+    DEC RAX
+    JMP rb_loop
 
